@@ -1,0 +1,25 @@
+name: Smoke
+on: [push, pull_request]
+jobs:
+  smoke:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: '20' }
+      - run: npm ci
+      - name: Start API
+        run: npm run start:dev &
+      - name: Wait API
+        run: |
+          $ErrorActionPreference='Stop'
+          for ($i=0; $i -lt 30; $i++) {
+            try { iwr "http://localhost:3001" -UseBasicParsing -TimeoutSec 2 | Out-Null; break } catch { Start-Sleep 2 }
+          }
+      - name: Run e2e
+        env:
+          BASE_URL: http://localhost:3001
+          JWT_SECRET: ${{ secrets.JWT_SECRET }}
+          MONGODB_URI: ${{ secrets.MONGODB_URI }}
+          REDIS_URL: ${{ secrets.REDIS_URL }}
+        run: powershell -NoProfile -ExecutionPolicy Bypass -File .\e2e.ps1
