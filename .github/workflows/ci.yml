@@ -1,0 +1,41 @@
+name: CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+
+jobs:
+  test-and-build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      # 👉 cria o .env a partir dos Repository secrets que você configurou
+      - name: Create .env from secrets
+        run: |
+          cat > .env <<'EOF'
+          PORT=${{ secrets.PORT }}
+          MONGODB_URI=${{ secrets.MONGODB_URI }}
+          JWT_SECRET=${{ secrets.JWT_SECRET }}
+          REDIS_URL=${{ secrets.REDIS_URL }}
+          EOF
+
+      - name: Install deps
+        run: npm ci
+
+      - name: Lint (opcional)
+        run: npm run lint --if-present
+
+      - name: Build
+        run: npm run build
+
+      # (opcional) Rode testes se tiver
+      # - name: Test
+      #   run: npm test -- --ci

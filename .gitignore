@@ -1,0 +1,14 @@
+﻿# Node/Nest
+node_modules/
+dist/
+coverage/
+npm-debug.log*
+yarn-error.log*
+.eslintcache
+
+# Env/segredos
+.env
+.env.*
+*.local
+*secret*
+firebase*.json

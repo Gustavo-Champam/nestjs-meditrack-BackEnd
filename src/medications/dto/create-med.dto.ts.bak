@@ -1,0 +1,21 @@
+import { IsString, IsOptional, IsNumber, Min, MaxLength } from 'class-validator';
+import { Type } from 'class-transformer';
+
+export class CreateMedDto {
+  @IsString()
+  @MaxLength(120)
+  name!: string;
+
+  // opcional (ex.: "mg", "ml", "comprimido")
+  @IsOptional()
+  @IsString()
+  @MaxLength(32)
+  unit?: string;
+
+  // opcional (padrão no schema é 0). Converte string numérica -> number
+  @IsOptional()
+  @Type(() => Number)
+  @IsNumber()
+  @Min(0)
+  stock?: number;
+}

@@ -1,0 +1,41 @@
+﻿import { ConflictException, Injectable } from '@nestjs/common';
+import { InjectModel } from '@nestjs/mongoose';
+import { Model, Types } from 'mongoose';
+import { Medication, MedicationDocument } from './schemas/medication.schema';
+import { CreateMedDto } from './dto/create-med.dto';
+
+@Injectable()
+export class MedicationsService {
+  async findAllByOwner(owner: any) {
+    return this.medicationModel.find({ owner }).lean();
+  }
+  constructor(
+    @InjectModel(Medication.name) private readonly model: Model<MedicationDocument>,
+  ) {}
+
+  async create(ownerId: string, dto: CreateMedDto) {
+    try {
+      const doc = await this.model.create({
+        owner: new Types.ObjectId(ownerId),
+        name: dto.name,
+        unit: dto.unit,
+        stock: dto.stock ?? 0,
+      });
+      return doc.toObject();
+    } catch (e: any) {
+      if (e?.code === 11000) {
+        throw new ConflictException('Medication already exists for this user');
+      }
+      throw e;
+    }
+  }
+
+  async listByOwner(ownerId: string) {
+    return this.model.find({ owner: ownerId }).sort({ createdAt: -1 }).lean();
+  }
+}
+
+
+
+
+

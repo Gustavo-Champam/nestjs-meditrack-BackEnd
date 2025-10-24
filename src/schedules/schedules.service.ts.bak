@@ -1,0 +1,87 @@
+import { Injectable, NotFoundException, Logger } from '@nestjs/common';
+import { InjectModel } from '@nestjs/mongoose';
+import { Model, Types } from 'mongoose';
+import { Schedule, ScheduleDocument } from './schedule.schema';  // Importando o tipo ScheduleDocument
+import { CreateScheduleDto } from './dto/create-schedule.dto';
+import { ConfigService } from '@nestjs/config';
+
+@Injectable()
+export class SchedulesService {
+  private readonly logger = new Logger(SchedulesService.name);
+
+  constructor(
+    @InjectModel(Schedule.name) private model: Model<ScheduleDocument>, // Usando ScheduleDocument aqui
+    private cfg: ConfigService,
+  ) {}
+
+  // Método para criar agendamentos
+  async create(ownerId: string, dto: CreateScheduleDto) {
+    try {
+      const doc: ScheduleDocument = await this.model.create({
+        owner: new Types.ObjectId(ownerId),
+        medicationId: new Types.ObjectId(dto.medicationId),
+        dose: dto.dose,
+        nextAt: new Date(dto.nextAt),
+        cron: (dto as any).cron,
+        enabled: (dto as any).enabled ?? true,
+      });
+
+      this.logger.log(`Agendamento criado com sucesso: ${doc._id}`);
+
+      const queueEnabled = this.cfg.get<string>('QUEUE_ENABLED') !== 'false';
+      if (!queueEnabled) {
+        this.logger.warn('Fila desativada por QUEUE_ENABLED=false. Job não processado.');
+        return doc;
+      }
+
+      await this.enqueue(doc);
+      return doc;
+    } catch (e: any) {
+      this.logger.error('Erro ao criar agendamento:', e.message);
+      this.logger.error('Stacktrace:', e.stack);  // Exibe a stack trace completa
+      throw new Error(`Erro interno ao processar o agendamento: ${e.message || e}`);
+    }
+  }
+
+  // Método para listar os agendamentos
+  list(ownerId: string) {
+    // Filtra os agendamentos pelo ID do dono (usuário)
+    return this.model.find({ owner: new Types.ObjectId(ownerId) }).lean();
+  }
+
+  // Método para alterar o status (habilitar/desabilitar) de um agendamento
+  async setEnabled(ownerId: string, id: string, enabled: boolean) {
+    try {
+      const doc: ScheduleDocument | null = await this.model.findOneAndUpdate(
+        { _id: new Types.ObjectId(id), owner: new Types.ObjectId(ownerId) },
+        { $set: { enabled } },
+        { new: true },
+      );
+
+      if (!doc) throw new NotFoundException('Agendamento não encontrado');
+
+      const queueEnabled = this.cfg.get<string>('QUEUE_ENABLED') !== 'false';
+      if (queueEnabled) {
+        try {
+          await this.enqueue(doc);
+        } catch (e: any) {
+          this.logger.warn(`enqueue falhou: ${e?.message || e} (seguindo sem fila)`);
+        }
+      }
+
+      return doc;
+    } catch (e: any) {
+      this.logger.error('Erro ao alterar agendamento:', e?.message || e);
+      throw new Error(`Erro ao alterar agendamento: ${e?.message || e}`);
+    }
+  }
+
+  // Função privada que adiciona o job na fila (se estiver habilitada)
+  private async enqueue(doc: ScheduleDocument) {
+    // Verifica se o agendamento está habilitado antes de tentar enfileirar
+    if (!doc.enabled) return;
+
+    this.logger.log(`Job enfileirado: ${doc._id}`);
+    // Aqui ficaria a lógica de enfileiramento, caso a fila esteja habilitada
+  }
+}

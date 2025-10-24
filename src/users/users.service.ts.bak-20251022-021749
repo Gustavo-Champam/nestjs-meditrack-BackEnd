@@ -1,0 +1,25 @@
+﻿import { verifyPasswordGeneric } from '../auth/password-helpers';
+
+@Injectable()
+export class UsersService {
+  constructor(@InjectModel(User.name) private readonly model: Model<UserDocument>) {}
+
+  async createInternal(data: { name: string; email: string; password_hash: string }) {
+    return this.model.create(data);
+async findByEmail(email: string) {
+    return this.model.findOne({ email }).select('+password +passwordHash +hashedPassword') .exec();
+async findById(id: string) {
+    return this.model.findById(id).exec();
+}
+
+@Injectable()
+export class UsersService {
+  constructor(@InjectModel(User.name) private readonly model: Model<UserDocument>) {}
+
+  async createInternal(data: { name: string; email: string; password_hash: string }) {
+    return this.model.create(data);
+async findByEmail(email: string) {
+    return this.model.findOne({ email }).select('+password +passwordHash +hashedPassword') .exec();
+async findById(id: string) {
+    return this.model.findById(id).exec();
+
