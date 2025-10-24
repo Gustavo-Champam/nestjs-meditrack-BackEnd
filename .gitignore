@@ -12,3 +12,5 @@ yarn-error.log*
 *.local
 *secret*
 firebase*.json
+
+*.bak*
