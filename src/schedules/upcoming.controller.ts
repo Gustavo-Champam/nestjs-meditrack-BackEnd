@@ -12,8 +12,11 @@ export class UpcomingController {
   @Get('upcoming')
   async upcoming(@Req() req: any, @Query('horizonHours') horizon = '168') {
     const owner = new Types.ObjectId(req.user.sub);
-    let h = parseInt(horizon as any, 10); if (!(h -as [int])) { h = 168 }
-    if (h < 1) { h = 1 } elseif (h > 720) { h = 720 }
+
+    let h = parseInt(String(horizon), 10);
+    if (Number.isNaN(h)) { h = 168; }
+    if (h < 1) h = 1;
+    if (h > 720) h = 720;
 
     const base = await this.model.find({ owner }).lean();
     const now = Date.now();
@@ -23,7 +26,7 @@ export class UpcomingController {
     for (const s of base as any[]) {
       const step = (s.repeatHours && s.repeatHours > 0) ? s.repeatHours * 3600 * 1000 : 0;
       let t = new Date(s.nextAt).getTime();
-      if (isNaN(t)) continue;
+      if (Number.isNaN(t)) continue;
 
       while (t <= end) {
         if (t >= now) {
