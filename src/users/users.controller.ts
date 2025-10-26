@@ -21,17 +21,16 @@ export class UsersController {
 
     if (!user) return null;
 
-    // monta resposta combinada
+    const u: any = user; // createdAt/updatedAt podem existir mas não estão tipados
     return {
-      _id: user._id,
-      name: user.name,
-      email: user.email,
-      // extras do profile
+      _id: u._id,
+      name: u.name,
+      email: u.email,
       phone: profile?.phone,
       address: profile?.address,
       birthDate: profile?.birthDate,
-      createdAt: user.createdAt,
-      updatedAt: user.updatedAt,
+      createdAt: u.createdAt ?? undefined,
+      updatedAt: u.updatedAt ?? undefined,
     };
   }
 
@@ -41,18 +40,19 @@ export class UsersController {
 
     const base: any = {};
     if (typeof dto.name === 'string') base.name = dto.name;
-    // nunca aceitar email aqui (evita troca acidental)
 
     const profileSet: any = {};
     if (typeof dto.phone !== 'undefined') profileSet.phone = dto.phone;
     if (typeof dto.address !== 'undefined') profileSet.address = dto.address;
     if (typeof dto.birthDate !== 'undefined') profileSet.birthDate = dto.birthDate;
 
-    let updatedUser = null;
+    let updatedUser: any;
     if (Object.keys(base).length) {
-      updatedUser = await this.userModel.findByIdAndUpdate(userId, { $set: base }, { new: true });
+      updatedUser = await this.userModel
+        .findByIdAndUpdate(userId, { $set: base }, { new: true })
+        .lean();
     } else {
-      updatedUser = await this.userModel.findById(userId);
+      updatedUser = await this.userModel.findById(userId).lean();
     }
 
     if (Object.keys(profileSet).length) {
@@ -64,6 +64,7 @@ export class UsersController {
     }
 
     const profile = await this.profileModel.findOne({ userId }).lean();
+
     return {
       _id: updatedUser?._id,
       name: updatedUser?.name,
@@ -71,8 +72,8 @@ export class UsersController {
       phone: profile?.phone,
       address: profile?.address,
       birthDate: profile?.birthDate,
-      createdAt: updatedUser?.createdAt,
-      updatedAt: updatedUser?.updatedAt,
+      createdAt: updatedUser?.createdAt ?? undefined,
+      updatedAt: updatedUser?.updatedAt ?? undefined,
     };
   }
 }
