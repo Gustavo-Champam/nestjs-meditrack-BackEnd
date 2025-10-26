@@ -1,4 +1,5 @@
 ﻿import { Module } from '@nestjs/common';
+import { DevtoolsModule } from './devtools/devtools.module';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { MongooseModule } from '@nestjs/mongoose';
 import { AuthModule } from './auth/auth.module';
@@ -11,7 +12,7 @@ import { WebhookModule } from './webhook/webhook.module';
 @Module({
   imports: [ConfigModule.forRoot({ isGlobal: true }),
     MongooseModule.forRootAsync({
-      inject: [ConfigService],
+      inject: [ConfigService, DevtoolsModule],
       useFactory: (cfg: ConfigService) => ({
         uri: cfg.get<string>('MONGODB_URI'),
       }),
@@ -25,6 +26,8 @@ import { WebhookModule } from './webhook/webhook.module';
     WebhookModule],
 })
 export class AppModule {}
+
+
 
 
 
