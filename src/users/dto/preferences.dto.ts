@@ -1,4 +1,4 @@
-﻿export interface UpdatePreferencesDto {
+export interface UpdatePreferencesDto {
   timezone?: string;
   locale?: string;
   timeFormat?: string;

@@ -1,4 +1,4 @@
-﻿import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
+import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { HydratedDocument, Types } from 'mongoose';
 
 @Schema({ collection: 'health_profiles', timestamps: true })
@@ -15,18 +15,10 @@ export class HealthProfile {
   @Prop() obs?: string;
 
   @Prop({
-    type: {
-      medico: {
-        nome: { type: String },
-        crm: { type: String },
-        contato: { type: String }
-      }
-    },
+    type: { medico: { nome: {type: String}, crm: {type: String}, contato: {type: String} } },
     _id: false
   })
-  medTeam?: {
-    medico?: { nome?: string; crm?: string; contato?: string };
-  };
+  medTeam?: { medico?: { nome?: string; crm?: string; contato?: string } };
 }
 export type HealthProfileDocument = HydratedDocument<HealthProfile>;
 export const HealthProfileSchema = SchemaFactory.createForClass(HealthProfile);

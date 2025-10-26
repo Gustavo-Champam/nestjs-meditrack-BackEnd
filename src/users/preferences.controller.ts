@@ -1,4 +1,4 @@
-﻿import { Body, Controller, Get, Put, Req, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Put, Req, UseGuards } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { AuthGuard } from '@nestjs/passport';
 import { Model, Types } from 'mongoose';
@@ -8,9 +8,7 @@ import { UpdatePreferencesDto } from './dto/preferences.dto';
 @UseGuards(AuthGuard('jwt'))
 @Controller('users/me/preferences')
 export class PreferencesController {
-  constructor(
-    @InjectModel(UserPreferences.name) private readonly model: Model<UserPreferencesDocument>,
-  ) {}
+  constructor(@InjectModel(UserPreferences.name) private readonly model: Model<UserPreferencesDocument>) {}
 
   @Get()
   async get(@Req() req: any) {
@@ -22,11 +20,9 @@ export class PreferencesController {
   @Put()
   async put(@Req() req: any, @Body() dto: UpdatePreferencesDto) {
     const userId = new Types.ObjectId(req.user.sub);
-    const doc = await this.model.findOneAndUpdate(
-      { userId },
-      { $set: dto, $setOnInsert: { userId } },
+    return this.model.findOneAndUpdate(
+      { userId }, { $set: dto, $setOnInsert: { userId } },
       { upsert: true, new: true, setDefaultsOnInsert: true },
     );
-    return doc;
   }
 }

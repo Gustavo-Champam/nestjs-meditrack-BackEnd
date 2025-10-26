@@ -1,4 +1,4 @@
-﻿import { Body, Controller, Get, Put, Req, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Put, Req, UseGuards } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { AuthGuard } from '@nestjs/passport';
 import { Model, Types } from 'mongoose';
@@ -8,9 +8,7 @@ import { UpdateHealthDto } from './dto/health.dto';
 @UseGuards(AuthGuard('jwt'))
 @Controller('users/me/health')
 export class HealthController {
-  constructor(
-    @InjectModel(HealthProfile.name) private readonly model: Model<HealthProfileDocument>,
-  ) {}
+  constructor(@InjectModel(HealthProfile.name) private readonly model: Model<HealthProfileDocument>) {}
 
   @Get()
   async get(@Req() req: any) {
@@ -26,11 +24,9 @@ export class HealthController {
     if (dto.healthProfile !== undefined) set.healthProfile = dto.healthProfile;
     if (dto.medTeam !== undefined) set.medTeam = dto.medTeam;
 
-    const doc = await this.model.findOneAndUpdate(
-      { userId },
-      { $set: set, $setOnInsert: { userId } },
+    return this.model.findOneAndUpdate(
+      { userId }, { $set: set, $setOnInsert: { userId } },
       { upsert: true, new: true, setDefaultsOnInsert: true },
     );
-    return doc;
   }
 }

@@ -1,26 +1,22 @@
-﻿import { Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model, Types } from 'mongoose';
+import { Model } from 'mongoose';
+import { User, UserDocument } from './schemas/user.schema';
 
 @Injectable()
 export class UsersService {
-  constructor(@InjectModel('User') private readonly userModel: Model<any>) {}
+  constructor(@InjectModel(User.name) private readonly userModel: Model<UserDocument>) {}
 
-  async findByEmail(email: string) {
+  findByEmail(email: string) {
     return this.userModel.findOne({ email }).exec();
   }
-
-  async findById(id: string) {
-    const _id = new Types.ObjectId(id);
-    return this.userModel.findById(_id).exec();
+  findById(id: any) {
+    return this.userModel.findById(id).exec();
   }
-
-  // << NOVO
-  async createUser(data: any) {
-    return this.userModel.create(data);
+  create(data: Partial<User>) {
+    return new this.userModel(data).save();
+  }
+  updateById(id: any, set: any) {
+    return this.userModel.findByIdAndUpdate(id, { $set: set }, { new: true }).exec();
   }
 }
-
-
-
-

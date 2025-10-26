@@ -1,4 +1,4 @@
-﻿export interface UpdateHealthDto {
+export interface UpdateHealthDto {
   healthProfile?: {
     alergias?: string[];
     condicoesCronicas?: string[];
@@ -7,7 +7,5 @@
     pesoKg?: number;
     obs?: string;
   };
-  medTeam?: {
-    medico?: { nome?: string; crm?: string; contato?: string };
-  };
+  medTeam?: { medico?: { nome?: string; crm?: string; contato?: string } };
 }

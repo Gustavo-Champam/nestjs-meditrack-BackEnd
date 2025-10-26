@@ -1,4 +1,4 @@
-﻿import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
+import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { HydratedDocument, Types } from 'mongoose';
 
 @Schema({ collection: 'user_profiles', timestamps: true })
@@ -21,13 +21,8 @@ export class UserProfile {
     _id: false
   })
   address?: {
-    logradouro?: string;
-    numero?: string;
-    bairro?: string;
-    cidade?: string;
-    uf?: string;
-    cep?: string;
-    pais?: string;
+    logradouro?: string; numero?: string; bairro?: string;
+    cidade?: string; uf?: string; cep?: string; pais?: string;
   };
 
   @Prop() birthDate?: Date;

@@ -1,15 +1,14 @@
-﻿import { Module } from '@nestjs/common';
+import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
-
 import { UsersController } from './users.controller';
 import { HealthController } from './health.controller';
 import { PreferencesController } from './preferences.controller';
-import { UsersService } from './users.service';
 
 import { User, UserSchema } from './schemas/user.schema';
 import { UserProfile, UserProfileSchema } from './schemas/user-profile.schema';
 import { HealthProfile, HealthProfileSchema } from './schemas/health.schema';
 import { UserPreferences, UserPreferencesSchema } from './schemas/preferences.schema';
+import { UsersService } from './users.service';
 
 @Module({
   imports: [

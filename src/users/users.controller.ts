@@ -1,4 +1,4 @@
-﻿import { Body, Controller, Get, Patch, Req, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Patch, Req, UseGuards } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { AuthGuard } from '@nestjs/passport';
 import { Model, Types } from 'mongoose';
@@ -16,45 +16,31 @@ export class UsersController {
   @Get('me')
   async me(@Req() req: any) {
     const userId = new Types.ObjectId(req.user.sub);
-    const user = await this.userModel.findById(userId).lean();
+    const u: any = await this.userModel.findById(userId).lean();
     const profile = await this.profileModel.findOne({ userId }).lean();
-
-    if (!user) return null;
-
-    const u: any = user; // createdAt/updatedAt podem existir mas não estão tipados
+    if (!u) return null;
     return {
-      _id: u._id,
-      name: u.name,
-      email: u.email,
-      phone: profile?.phone,
-      address: profile?.address,
-      birthDate: profile?.birthDate,
-      createdAt: u.createdAt ?? undefined,
-      updatedAt: u.updatedAt ?? undefined,
+      _id: u._id, name: u.name, email: u.email,
+      phone: profile?.phone, address: profile?.address, birthDate: profile?.birthDate,
+      createdAt: u?.createdAt, updatedAt: u?.updatedAt,
     };
   }
 
   @Patch('me')
   async updateMe(@Req() req: any, @Body() dto: any) {
     const userId = new Types.ObjectId(req.user.sub);
-
     const base: any = {};
     if (typeof dto.name === 'string') base.name = dto.name;
 
     const profileSet: any = {};
-    if (typeof dto.phone !== 'undefined') profileSet.phone = dto.phone;
-    if (typeof dto.address !== 'undefined') profileSet.address = dto.address;
-    if (typeof dto.birthDate !== 'undefined') profileSet.birthDate = dto.birthDate;
+    if (dto.phone !== undefined) profileSet.phone = dto.phone;
+    if (dto.address !== undefined) profileSet.address = dto.address;
+    if (dto.birthDate !== undefined) profileSet.birthDate = dto.birthDate;
 
-    let updatedUser: any;
+    let updated: any = await this.userModel.findById(userId).lean();
     if (Object.keys(base).length) {
-      updatedUser = await this.userModel
-        .findByIdAndUpdate(userId, { $set: base }, { new: true })
-        .lean();
-    } else {
-      updatedUser = await this.userModel.findById(userId).lean();
+      updated = await this.userModel.findByIdAndUpdate(userId, { $set: base }, { new: true }).lean();
     }
-
     if (Object.keys(profileSet).length) {
       await this.profileModel.findOneAndUpdate(
         { userId },
@@ -62,18 +48,11 @@ export class UsersController {
         { upsert: true, new: true, setDefaultsOnInsert: true },
       );
     }
-
     const profile = await this.profileModel.findOne({ userId }).lean();
-
     return {
-      _id: updatedUser?._id,
-      name: updatedUser?.name,
-      email: updatedUser?.email,
-      phone: profile?.phone,
-      address: profile?.address,
-      birthDate: profile?.birthDate,
-      createdAt: updatedUser?.createdAt ?? undefined,
-      updatedAt: updatedUser?.updatedAt ?? undefined,
+      _id: updated?._id, name: updated?.name, email: updated?.email,
+      phone: profile?.phone, address: profile?.address, birthDate: profile?.birthDate,
+      createdAt: updated?.createdAt, updatedAt: updated?.updatedAt,
     };
   }
 }

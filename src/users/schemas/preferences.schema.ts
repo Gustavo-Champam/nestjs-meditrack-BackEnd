@@ -1,4 +1,4 @@
-﻿import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
+import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { HydratedDocument, Types } from 'mongoose';
 
 @Schema({ collection: 'user_preferences', timestamps: true })
@@ -8,8 +8,8 @@ export class UserPreferences {
 
   @Prop() timezone?: string;
   @Prop() locale?: string;
-  @Prop() timeFormat?: string;   // "24h" | "12h"
-  @Prop() units?: string;        // "metric" | "imperial"
+  @Prop() timeFormat?: string; // "24h" | "12h"
+  @Prop() units?: string;      // "metric" | "imperial"
 
   @Prop({ type: Array, default: [] }) accessibility?: any[];
   @Prop({ type: Array, default: [] }) notificationSettings?: any[];
