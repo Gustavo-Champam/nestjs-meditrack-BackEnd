@@ -1,8 +1,10 @@
 ﻿import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
+
 import { UsersController } from './users.controller';
 import { HealthController } from './health.controller';
 import { PreferencesController } from './preferences.controller';
+import { UsersService } from './users.service';
 
 import { User, UserSchema } from './schemas/user.schema';
 import { UserProfile, UserProfileSchema } from './schemas/user-profile.schema';
@@ -19,5 +21,7 @@ import { UserPreferences, UserPreferencesSchema } from './schemas/preferences.sc
     ]),
   ],
   controllers: [UsersController, HealthController, PreferencesController],
+  providers: [UsersService],
+  exports: [UsersService],
 })
 export class UsersModule {}

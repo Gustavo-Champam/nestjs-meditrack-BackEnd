@@ -32,3 +32,4 @@ import { PasswordResetDevController } from './password-reset.dev.controller';
   exports: [AuthService, JwtModule],
 })
 export class AuthModule {}
+
